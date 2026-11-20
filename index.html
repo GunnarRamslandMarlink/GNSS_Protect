@@ -9,6 +9,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
     body {
       background: #0a1628;
@@ -16,63 +17,107 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 6px 8px;
       font-family: Arial, sans-serif;
       color: white;
-      overflow: hidden;
-      touch-action: none;
+      overflow-x: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
     h1 {
-      margin-bottom: 10px;
-      font-size: 24px;
+      margin-bottom: 6px;
+      font-size: 22px;
       color: #7dd3fc;
     }
-    #gameCanvas {
-      background: #0b2a4a;
+    /* The map always fits the screen: width follows the smaller of 400 px, the screen width and
+       the screen height, and the height follows the 2:3 shape of the map. */
+    #stage {
+      position: relative;
+      width: min(400px, calc(100vw - 16px), calc((100vh - 96px) * 2 / 3));
+      width: min(400px, calc(100vw - 16px), calc((100dvh - 96px) * 2 / 3));
       border: 3px solid #38bdf8;
       border-radius: 12px;
-      max-width: 100%;
+      overflow: hidden;
       box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+      background: #0b2a4a;
+      line-height: 0;
     }
-    #ui {
-      margin-top: 10px;
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 2 / 3;
+      touch-action: none;
+    }
+    /* Message and Start button sit in the middle of the map and go away when the game starts */
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: grid;
+      grid-template-rows: 1fr auto 1fr;
+      justify-items: center;
+      align-items: center;
+      padding: 16px;
       text-align: center;
-      font-size: 20px;
+      line-height: 1.3;
+      background: rgba(6, 26, 51, 0.55);
     }
+    /* the button is always in the exact middle; the message sits above it */
     #message {
-      margin-top: 6px;
-      font-size: 18px;
+      grid-row: 1;
+      align-self: end;
+      font-size: 17px;
       color: #86efac;
-      min-height: 46px;
+      margin-bottom: 14px;
+      white-space: pre-line;
     }
-    button, select {
-      margin-top: 10px;
-      padding: 10px 24px;
-      font-size: 18px;
+    #startBtn {
+      grid-row: 2;
+    }
+    #message:empty {
+      display: none;
+    }
+    button {
+      padding: 16px 34px;
+      font-size: 22px;
+      font-weight: bold;
       background: #0ea5e9;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
+      touch-action: manipulation;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
-    select {
-      background: #0c4a6e;
-      border: 1px solid #38bdf8;
-      font-size: 16px;
-    }
-    button:hover {
+    button:hover, button:active {
       background: #38bdf8;
+    }
+    #scoreLine {
+      margin-top: 6px;
+      font-size: 18px;
+    }
+    @media (max-width: 360px) {
+      #message { font-size: 15px; }
+      button { padding: 14px 26px; font-size: 20px; }
     }
   </style>
 </head>
 <body>
   <h1>GNSS Protect</h1>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
-  <div id="ui">
-    <div>Emails sent: <span id="score">0</span></div>
-    <div id="message"></div>
-    <button id="startBtn" onclick="startGame()">Start Sailing</button>
+  <div id="stage">
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div id="overlay">
+      <div id="message"></div>
+      <button id="startBtn" onclick="startGame()">Start Sailing</button>
+    </div>
   </div>
+  <div id="scoreLine">Emails sent: <span id="score">0</span></div>
 
   <script>
     const REAL_DATA = {"generated":"2026-09-16T10:12Z","pool":[[5,0.7],[1,0.6],[1,0.9],[1,0.6],[1,0.5],[1,0.6],[2,0.7],[1,0.6],[2,0.6],[1,0.6],[1,0.6],[3,0.6],[1,0.7],[4,0.9],[4,0.7],[1,0.6],[2,0.6],[39,3.0],[2,1.4],[17,2.0],[1,0.6],[1,0.6],[2,0.8],[2,2.0],[10,2.0],[14,2.0],[1,0.6],[2,0.6],[1,0.6],[1,2.0],[6,0.6],[1,0.6],[4,0.6],[3,0.7],[3,0.7],[3,1.0],[5,0.9],[7,0.8],[1,0.6],[1,0.6],[4,0.6],[2,0.6],[1,0.6],[1,0.6],[3,0.6],[14,1.0],[1,0.6],[2,0.9],[1,0.6],[1,0.6],[1,0.6],[6,2.0],[1,2.0],[6,2.0],[5,2.0],[3,2.0],[7,2.0],[1,2.0],[10,2.0],[2,2.0],[1,0.5],[1,0.6],[2,0.7],[2,0.6],[4,0.9],[1,0.6],[1,0.6],[2,0.6],[2,0.7],[2,0.7],[30,3.0],[1,0.6],[2,0.7],[9,1.0],[1,0.6],[2,0.6],[2,0.6],[6,0.6],[7,0.6],[4,0.6],[1,0.6],[1,0.6],[2,0.6],[3,0.6],[1,0.5],[1,0.6],[29,3.0],[11,2.0],[26,2.0],[17,2.0],[10,2.0],[4,0.6],[1,0.6],[99,2.0],[1,2.0],[2,2.0],[2,0.6],[1,0.6],[9,0.7],[9,0.9],[5,0.6],[11,0.6],[2,0.6],[1,0.6],[2,0.6],[3,0.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[8,2.8],[2,0.6],[1,0.6],[2,0.6],[3,2.0],[3,2.0],[2,2.0],[41,2.0],[1,0.6],[2,0.9],[1,0.6],[1,0.6],[25,2.0],[4,0.9],[2,0.6],[5,2.0],[8,1.0],[1,0.6],[3,0.7],[3,0.7],[1,0.6],[2,0.6],[3,1.0],[9,1.0],[11,0.7],[3,0.8],[2,0.7],[13,2.0],[1,0.6],[5,0.6],[21,2.0],[6,1.5],[2,0.9],[2,0.6],[1,0.6],[3,2.0],[1,0.6],[1,0.9],[1,0.6],[1,0.7],[1,0.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[13,0.7],[2,0.6],[1,0.6],[1,0.6],[1,0.6],[4,0.6],[2,0.6],[6,2.0],[1,0.6],[2,0.6],[52,3.0],[1,0.6],[4,0.6],[1,0.6],[6,2.0],[3,0.6],[1,0.6],[4,0.6],[2,0.6],[1,0.6],[1,0.6],[1,0.6],[1,0.6],[3,0.6],[4,0.7],[1,0.7],[8,1.0],[2,0.6],[4,0.9],[3,0.6],[1,2.0],[3,0.8],[2,0.9],[6,2.0],[7,2.0],[12,2.0],[4,0.6],[3,0.6],[4,0.6],[1,0.6],[2,0.6],[3,0.6],[6,0.6],[1,0.6],[1,0.6],[1,0.6],[3,0.7],[3,0.6],[1,0.6],[1,0.5],[1,2.0],[1,0.6],[2,0.6],[8,2.4],[2,0.6],[2,1.0],[8,2.0],[13,0.9],[1,0.6],[1,0.6],[27,3.0],[1,0.6],[1,0.9],[1,0.6],[1,0.7],[1,0.6],[1,0.6],[5,1.0],[1,0.6],[5,1.0],[11,3.0],[4,0.6],[5,2.0],[12,2.0],[1,0.6],[1,0.7],[2,0.6],[1,0.6],[1,0.7],[4,2.8],[1,2.0],[49,3.0],[15,3.0],[9,4.0],[42,4.0],[5,4.0],[28,4.0],[35,4.0],[1,0.6],[2,0.6],[5,0.7],[4,0.6],[1,0.6],[1,0.6],[15,2.0],[1,0.6],[15,3.6],[9,2.5],[15,2.0],[22,3.0],[4,2.0],[13,4.0],[1,0.6],[1,0.6],[1,0.6],[1,0.6],[4,0.6],[3,0.7],[5,0.6],[14,0.9],[1,0.6],[2,0.6],[4,0.8],[15,4.0],[12,3.0],[3,2.5],[6,3.0],[2,2.0],[2,2.0],[2,2.0],[2,2.0],[2,2.0],[1,2.0],[2,2.3],[1,0.6],[2,0.6],[3,2.0],[4,0.7],[1,0.6],[4,0.6],[1,0.6],[6,0.8],[4,0.9],[4,0.7],[10,4.0],[11,2.0],[2,0.7],[17,3.0],[3,0.7],[1,2.0],[3,4.0],[2,2.0],[1,2.0],[2,2.0],[1,2.0],[2,0.6],[2,2.0],[7,2.0],[2,2.0],[2,0.9],[5,1.6],[5,2.0],[1,0.6],[1,0.6],[1,0.6],[9,0.8],[2,0.8],[1,0.7],[1,0.6],[1,0.6],[2,0.6],[8,2.5],[1,0.6],[2,0.7],[5,2.6],[3,2.0],[3,2.0],[2,2.0],[2,2.0],[1,0.6],[1,2.0],[3,0.6],[1,2.0],[12,2.3],[1,0.6],[23,3.4],[10,2.5],[5,4.0],[1,0.6],[1,0.7],[18,3.9],[1,2.0],[8,2.5],[3,0.6],[8,1.0],[15,3.3],[1,0.7],[6,0.9],[1,0.6],[1,0.6],[3,0.6],[11,4.0],[7,3.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[6,3.3],[1,0.6],[1,0.7],[1,0.6],[10,2.4],[5,4.0],[7,4.0],[1,0.6],[1,0.6],[2,0.7],[2,0.6],[1,0.6],[9,4.0],[12,2.4],[9,3.1],[1,0.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[2,0.6],[2,0.6],[1,0.6],[1,0.6],[1,0.7],[8,0.9],[1,0.7],[12,4.0],[19,4.0],[12,4.0],[7,2.0],[15,2.0],[1,0.6],[1,0.6],[18,3.4],[7,2.0],[5,2.4],[19,3.3],[2,2.0],[13,4.0],[15,3.6]],"levels":[{"n":"Level 1","attacks":6},{"n":"Level 2","attacks":8},{"n":"Level 3","attacks":11},{"n":"Level 4","attacks":15},{"n":"Level 5","attacks":21},{"n":"Level 6","attacks":29},{"n":"Level 7","attacks":39},{"n":"Level 8","attacks":54},{"n":"Level 9","attacks":73},{"n":"Level 10","attacks":100}]};
@@ -82,6 +127,7 @@
     const scoreDisplay = document.getElementById("score");
     const messageDisplay = document.getElementById("message");
     const startBtn = document.getElementById("startBtn");
+    const overlay = document.getElementById("overlay");
     // The player does not choose the level: it starts at level 1 and moves on by itself
     const levelSel = { value: 0, disabled: false };
 
@@ -364,6 +410,23 @@
                  (e.clientY - rect.top) * canvas.height / rect.height);
     });
     canvas.addEventListener("contextmenu", e => e.preventDefault());
+    if (!window.PointerEvent) {
+      // old phones and browsers without pointer events: use touch and mouse events instead
+      const tapAt = (cx, cy) => {
+        const rect = canvas.getBoundingClientRect();
+        tapProtect((cx - rect.left) * canvas.width / rect.width,
+                   (cy - rect.top) * canvas.height / rect.height);
+      };
+      canvas.addEventListener("touchstart", e => {
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        tapAt(t.clientX, t.clientY);
+      }, { passive: false });
+      canvas.addEventListener("mousedown", e => {
+        e.preventDefault();
+        tapAt(e.clientX, e.clientY);
+      });
+    }
 
     function startGame() {
       if (!REAL_DATA || !REAL_DATA.levels.length) {
@@ -374,6 +437,7 @@
         clearTimeout(nextTimer);
         nextTimer = null;
       }
+      cancelAnimationFrame(animationId);   // never run two game loops at once
       T = 0;
       protectUntil = 0;
       lastTapT = -99;
@@ -407,7 +471,7 @@
       events = makeEvents(REAL_DATA.levels[+levelSel.value].attacks);
       gameRunning = true;
       messageDisplay.textContent = "";
-      startBtn.style.display = "none";
+      overlay.style.display = "none";
       levelSel.disabled = true;
       scoreDisplay.textContent = "0";
       lastNow = performance.now();
@@ -830,7 +894,7 @@
         ", connection lost " + changesLost + " times.";
       messageDisplay.style.whiteSpace = "pre-line";
       levelSel.disabled = false;
-      startBtn.style.display = "inline-block";
+      overlay.style.display = "grid";
       if (passed && idx < lastLevel) {
         // more than ADVANCE_EMAILS sent: the next level starts by itself
         messageDisplay.style.color = "#86efac";
