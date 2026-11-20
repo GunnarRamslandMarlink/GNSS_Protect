@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Ship Sailing Game</title>
+  <title>GNSS Protect</title>
   <style>
     * {
       margin: 0;
@@ -28,26 +28,26 @@
       color: #7dd3fc;
     }
     #gameCanvas {
-      background: linear-gradient(#0c4a6e, #0369a1);
+      background: #0b2a4a;
       border: 3px solid #38bdf8;
       border-radius: 12px;
       max-width: 100%;
       box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
     }
     #ui {
-      margin-top: 15px;
+      margin-top: 10px;
       text-align: center;
       font-size: 20px;
     }
     #message {
-      margin-top: 10px;
-      font-size: 22px;
-      color: #f87171;
-      min-height: 30px;
+      margin-top: 6px;
+      font-size: 18px;
+      color: #86efac;
+      min-height: 46px;
     }
-    button {
-      margin-top: 15px;
-      padding: 12px 28px;
+    button, select {
+      margin-top: 10px;
+      padding: 10px 24px;
       font-size: 18px;
       background: #0ea5e9;
       color: white;
@@ -55,207 +55,807 @@
       border-radius: 8px;
       cursor: pointer;
     }
+    select {
+      background: #0c4a6e;
+      border: 1px solid #38bdf8;
+      font-size: 16px;
+    }
     button:hover {
       background: #38bdf8;
-    }
-    .controls {
-      margin-top: 12px;
-      font-size: 14px;
-      color: #94a3b8;
     }
   </style>
 </head>
 <body>
-  <h1>Ship Sailing</h1>
+  <h1>GNSS Protect</h1>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
   <div id="ui">
-    <div>Score: <span id="score">0</span></div>
+    <div>Emails sent: <span id="score">0</span></div>
     <div id="message"></div>
     <button id="startBtn" onclick="startGame()">Start Sailing</button>
-    <div class="controls">
-      Desktop: ← → or A D<br>
-      Mobile: Tap left or right side of the screen
-    </div>
   </div>
 
   <script>
+    const REAL_DATA = {"generated":"2026-09-16T10:12Z","pool":[[5,0.7],[1,0.6],[1,0.9],[1,0.6],[1,0.5],[1,0.6],[2,0.7],[1,0.6],[2,0.6],[1,0.6],[1,0.6],[3,0.6],[1,0.7],[4,0.9],[4,0.7],[1,0.6],[2,0.6],[39,3.0],[2,1.4],[17,2.0],[1,0.6],[1,0.6],[2,0.8],[2,2.0],[10,2.0],[14,2.0],[1,0.6],[2,0.6],[1,0.6],[1,2.0],[6,0.6],[1,0.6],[4,0.6],[3,0.7],[3,0.7],[3,1.0],[5,0.9],[7,0.8],[1,0.6],[1,0.6],[4,0.6],[2,0.6],[1,0.6],[1,0.6],[3,0.6],[14,1.0],[1,0.6],[2,0.9],[1,0.6],[1,0.6],[1,0.6],[6,2.0],[1,2.0],[6,2.0],[5,2.0],[3,2.0],[7,2.0],[1,2.0],[10,2.0],[2,2.0],[1,0.5],[1,0.6],[2,0.7],[2,0.6],[4,0.9],[1,0.6],[1,0.6],[2,0.6],[2,0.7],[2,0.7],[30,3.0],[1,0.6],[2,0.7],[9,1.0],[1,0.6],[2,0.6],[2,0.6],[6,0.6],[7,0.6],[4,0.6],[1,0.6],[1,0.6],[2,0.6],[3,0.6],[1,0.5],[1,0.6],[29,3.0],[11,2.0],[26,2.0],[17,2.0],[10,2.0],[4,0.6],[1,0.6],[99,2.0],[1,2.0],[2,2.0],[2,0.6],[1,0.6],[9,0.7],[9,0.9],[5,0.6],[11,0.6],[2,0.6],[1,0.6],[2,0.6],[3,0.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[8,2.8],[2,0.6],[1,0.6],[2,0.6],[3,2.0],[3,2.0],[2,2.0],[41,2.0],[1,0.6],[2,0.9],[1,0.6],[1,0.6],[25,2.0],[4,0.9],[2,0.6],[5,2.0],[8,1.0],[1,0.6],[3,0.7],[3,0.7],[1,0.6],[2,0.6],[3,1.0],[9,1.0],[11,0.7],[3,0.8],[2,0.7],[13,2.0],[1,0.6],[5,0.6],[21,2.0],[6,1.5],[2,0.9],[2,0.6],[1,0.6],[3,2.0],[1,0.6],[1,0.9],[1,0.6],[1,0.7],[1,0.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[13,0.7],[2,0.6],[1,0.6],[1,0.6],[1,0.6],[4,0.6],[2,0.6],[6,2.0],[1,0.6],[2,0.6],[52,3.0],[1,0.6],[4,0.6],[1,0.6],[6,2.0],[3,0.6],[1,0.6],[4,0.6],[2,0.6],[1,0.6],[1,0.6],[1,0.6],[1,0.6],[3,0.6],[4,0.7],[1,0.7],[8,1.0],[2,0.6],[4,0.9],[3,0.6],[1,2.0],[3,0.8],[2,0.9],[6,2.0],[7,2.0],[12,2.0],[4,0.6],[3,0.6],[4,0.6],[1,0.6],[2,0.6],[3,0.6],[6,0.6],[1,0.6],[1,0.6],[1,0.6],[3,0.7],[3,0.6],[1,0.6],[1,0.5],[1,2.0],[1,0.6],[2,0.6],[8,2.4],[2,0.6],[2,1.0],[8,2.0],[13,0.9],[1,0.6],[1,0.6],[27,3.0],[1,0.6],[1,0.9],[1,0.6],[1,0.7],[1,0.6],[1,0.6],[5,1.0],[1,0.6],[5,1.0],[11,3.0],[4,0.6],[5,2.0],[12,2.0],[1,0.6],[1,0.7],[2,0.6],[1,0.6],[1,0.7],[4,2.8],[1,2.0],[49,3.0],[15,3.0],[9,4.0],[42,4.0],[5,4.0],[28,4.0],[35,4.0],[1,0.6],[2,0.6],[5,0.7],[4,0.6],[1,0.6],[1,0.6],[15,2.0],[1,0.6],[15,3.6],[9,2.5],[15,2.0],[22,3.0],[4,2.0],[13,4.0],[1,0.6],[1,0.6],[1,0.6],[1,0.6],[4,0.6],[3,0.7],[5,0.6],[14,0.9],[1,0.6],[2,0.6],[4,0.8],[15,4.0],[12,3.0],[3,2.5],[6,3.0],[2,2.0],[2,2.0],[2,2.0],[2,2.0],[2,2.0],[1,2.0],[2,2.3],[1,0.6],[2,0.6],[3,2.0],[4,0.7],[1,0.6],[4,0.6],[1,0.6],[6,0.8],[4,0.9],[4,0.7],[10,4.0],[11,2.0],[2,0.7],[17,3.0],[3,0.7],[1,2.0],[3,4.0],[2,2.0],[1,2.0],[2,2.0],[1,2.0],[2,0.6],[2,2.0],[7,2.0],[2,2.0],[2,0.9],[5,1.6],[5,2.0],[1,0.6],[1,0.6],[1,0.6],[9,0.8],[2,0.8],[1,0.7],[1,0.6],[1,0.6],[2,0.6],[8,2.5],[1,0.6],[2,0.7],[5,2.6],[3,2.0],[3,2.0],[2,2.0],[2,2.0],[1,0.6],[1,2.0],[3,0.6],[1,2.0],[12,2.3],[1,0.6],[23,3.4],[10,2.5],[5,4.0],[1,0.6],[1,0.7],[18,3.9],[1,2.0],[8,2.5],[3,0.6],[8,1.0],[15,3.3],[1,0.7],[6,0.9],[1,0.6],[1,0.6],[3,0.6],[11,4.0],[7,3.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[6,3.3],[1,0.6],[1,0.7],[1,0.6],[10,2.4],[5,4.0],[7,4.0],[1,0.6],[1,0.6],[2,0.7],[2,0.6],[1,0.6],[9,4.0],[12,2.4],[9,3.1],[1,0.6],[1,0.6],[1,0.6],[2,0.6],[1,0.6],[2,0.6],[2,0.6],[1,0.6],[1,0.6],[1,0.7],[8,0.9],[1,0.7],[12,4.0],[19,4.0],[12,4.0],[7,2.0],[15,2.0],[1,0.6],[1,0.6],[18,3.4],[7,2.0],[5,2.4],[19,3.3],[2,2.0],[13,4.0],[15,3.6]],"levels":[{"n":"Level 1","attacks":6},{"n":"Level 2","attacks":8},{"n":"Level 3","attacks":11},{"n":"Level 4","attacks":15},{"n":"Level 5","attacks":21},{"n":"Level 6","attacks":29},{"n":"Level 7","attacks":39},{"n":"Level 8","attacks":54},{"n":"Level 9","attacks":73},{"n":"Level 10","attacks":100}]};
+
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const scoreDisplay = document.getElementById("score");
     const messageDisplay = document.getElementById("message");
     const startBtn = document.getElementById("startBtn");
+    // The player does not choose the level: it starts at level 1 and moves on by itself
+    const levelSel = { value: 0, disabled: false };
+
+    const ROUND_SEC = 60;
+    // Random spoofing attacks: the level sets how many (REAL_DATA.levels[].attacks). Each attack
+    // is picked at random from the list of real episodes (REAL_DATA.pool); its length in seconds
+    // is 0.5 + 0.5 * sqrt(real minutes), kept between ATTACK_MIN_DUR and ATTACK_MAX_DUR.
+    const ATTACK_FIRST = 3;        // attacks fall between these seconds of the trip
+    const ATTACK_LAST = 57;
+    const GAP_MIN = 5;             // seconds between attacks, kept whenever the level leaves room
+    const ATTACK_MIN_DUR = 0.5;
+    const ATTACK_MAX_DUR = 3.5;
+    const ATTACK_MAX_SHARE = 0.5;  // attacks are shortened so they fill at most this share of the time
+    // The attack that goes with each satellite change: it starts a random 2 to 6 seconds before
+    // the change and lasts until the change is done plus CHANGE_ATTACK_AFTER more seconds.
+    // Where two of them overlap they run together as one longer attack.
+    const CHANGE_ATTACK_LEAD = 2;      // it starts at least this many seconds before the change
+    const CHANGE_ATTACK_LEAD_VAR = 4;  // plus a random extra of up to this much (2 to 6 s in all)
+    const CHANGE_ATTACK_AFTER = 2;     // seconds it lasts after the change is done
+    const RECOVER = 10;            // link % per second when the position is not spoofed
+    const SEND_MIN_LINK = 50;      // link % needed to send emails
+    const PROTECT_SEC = 1.0;       // one press protects for this long; press again to renew
+    const EMAILS_TOTAL = 300;      // emails the crew writes in one round (one every 0.2 s)
+    const ADVANCE_EMAILS = 150;    // more than this many emails sent: go on to the next level
+    const NEXT_LEVEL_DELAY = 3000; // milliseconds before the next level starts by itself
+    const SEND_EVERY = 0.07;       // seconds per email sent while online (about 3x the writing rate)
+    const SAT_Y = 105;             // all satellites sit at the same height
+    // x of the satellites, right to left, following the route from Hormuz (right) to Dubai (left)
+    const SATS = [300, 263, 226, 188, 151, 114];
+    const CHANGE_TIMES = [10, 20, 30, 40, 50];  // planned satellite changes (seconds)
+    const WARN_SEC = 6;            // the next satellite shows this long before a change
+    const CHANGE_WINDOW = 4;       // seconds during which a press protects the change
+    const PRE_GRACE = 2;           // a press this many seconds before the change also counts
+
+    // Satellite picture: NASA MODIS Terra, 2 Dec 2020, 2235 x 1741 px, plate carree.
+    // Calibrated on three Dubai landmarks (about 440 px per degree) and checked on
+    // Hengam, Larak and the Musandam tip (within about 10 km).
+    const MAP_FILE = "map/Strait_of_Hormuz_MODIS_2020-12-04.jpg";
+    const IMG_PX_PER_DEG = 440, IMG_LAT0 = 25.117, IMG_LON0 = 55.133, IMG_X0 = 837, IMG_Y0 = 1229;
+    const CROP = { x: 602, y: 0, w: 1056, h: 1584 };   // part of the picture shown
+    const MAP_S = canvas.width / CROP.w;               // 400 / 1056 = 600 / 1584
+
+    function proj(lat, lon) {
+      const ix = IMG_X0 + (lon - IMG_LON0) * IMG_PX_PER_DEG;
+      const iy = IMG_Y0 - (lat - IMG_LAT0) * IMG_PX_PER_DEG;
+      return [(ix - CROP.x) * MAP_S, (iy - CROP.y) * MAP_S];
+    }
+
+    const mapImg = new Image();
+    let mapReady = false;
+    mapImg.onload = () => { mapReady = true; draw(); };
+    mapImg.src = MAP_FILE;
+
+    // Route from the Strait of Hormuz to Dubai (lat, lon)
+    const ROUTE_LL = [
+      [26.58, 56.40], [26.42, 56.10], [26.20, 55.75], [25.85, 55.45], [25.55, 55.25], [25.35, 55.20], [25.31, 55.22]
+    ];
+    const ROUTE = ROUTE_LL.map(p => proj(p[0], p[1]));
+    const DUBAI = proj(25.27, 55.28);
+    const SEG_LEN = [];
+    let ROUTE_LEN = 0;
+    for (let i = 1; i < ROUTE.length; i++) {
+      const d = Math.hypot(ROUTE[i][0] - ROUTE[i - 1][0], ROUTE[i][1] - ROUTE[i - 1][1]);
+      SEG_LEN.push(d);
+      ROUTE_LEN += d;
+    }
+
+    // Places along the coast where an attack can put the false position (lat, lon). They were
+    // checked on the satellite picture and are accurate to a few kilometres.
+    const FALSE_SPOTS_LL = [
+      [25.01, 55.04], [25.27, 55.27], [25.37, 55.37], [25.42, 55.44], [25.58, 55.55],
+      [25.80, 55.95], [26.19, 56.25], [26.40, 56.38], [25.62, 56.38], [25.35, 56.41],
+      [25.12, 56.40], [27.17, 56.27], [26.95, 55.58], [26.55, 54.88], [26.64, 55.55]
+    ];
+    const FALSE_SPOTS = FALSE_SPOTS_LL.map(p => proj(p[0], p[1]));
+    let falsePos = FALSE_SPOTS[4];   // the false position of the attack that is on now
+
+    // Other vessels: in a fleet event on 14 Sep 2026, about 07:42-07:57 UTC, a group of vessels jumped
+    // within 15 minutes to one shared false position. Here they jump to the false position of each
+    // attack, one after the other. Start positions are rounded to 0.1 degree, no vessel identity.
+    const OTHERS = [
+      [25.7, 54.8, 0.0], [28.5, 48.9, 0.7], [25.9, 54.0, 0.7], [25.4, 55.1, 0.7], [24.5, 54.3, 1.0],
+      [26.9, 50.5, 1.3], [24.6, 53.0, 1.8], [25.5, 53.4, 2.0], [25.4, 55.0, 2.3], [25.9, 51.8, 2.7],
+      [25.9, 51.7, 4.0]
+    ].map(o => ({ home: proj(o[0], o[1]), delay: o[2] }));
+
+    function routeAt(frac) {
+      let d = Math.max(0, Math.min(1, frac)) * ROUTE_LEN;
+      for (let i = 0; i < SEG_LEN.length; i++) {
+        if (d <= SEG_LEN[i] || i === SEG_LEN.length - 1) {
+          const f = SEG_LEN[i] > 0 ? Math.min(1, d / SEG_LEN[i]) : 0;
+          const a = ROUTE[i], b = ROUTE[i + 1];
+          return { x: a[0] + (b[0] - a[0]) * f, y: a[1] + (b[1] - a[1]) * f,
+                   heading: Math.atan2(b[1] - a[1], b[0] - a[0]) };
+        }
+        d -= SEG_LEN[i];
+      }
+      return { x: ROUTE[0][0], y: ROUTE[0][1], heading: 0 };
+    }
+
+    // Point on the canvas edge toward an off-map position, seen from the false position
+    function onMap(px, py) {
+      if (px >= 8 && px <= canvas.width - 8 && py >= 8 && py <= canvas.height - 8) return [px, py, true];
+      const dx = px - falsePos[0], dy = py - falsePos[1];
+      let t = Infinity;
+      if (dx > 0) t = Math.min(t, (canvas.width - 8 - falsePos[0]) / dx);
+      else if (dx < 0) t = Math.min(t, (8 - falsePos[0]) / dx);
+      if (dy > 0) t = Math.min(t, (canvas.height - 8 - falsePos[1]) / dy);
+      else if (dy < 0) t = Math.min(t, (8 - falsePos[1]) / dy);
+      return [falsePos[0] + dx * t, falsePos[1] + dy * t, false];
+    }
 
     // Game variables
-    let ship = { x: 175, y: 480, width: 50, height: 70 };
-    let obstacles = [];
-    let score = 0;
+    let ship = routeAt(0);
     let gameRunning = false;
-    let keys = {};
     let animationId;
-    let speed = 3;
-    let spawnTimer = 0;
+    let holding = false;           // true while a press is still protecting
+    let protectUntil = 0;          // game time when the last press stops protecting
+    let lastTapT = -99;            // game time of the last press
+    let T = 0;
+    let link = 100;
+    let jamming = false;
+    let jamStart = 0;
+    let jamDur = 2;                // length of the attack that is on now
+    let jamEventStart = -1;        // start time of the attack that is on now
+    let lastNow = 0;
+    let written = 0;
+    let sent = 0;
+    let writeTimer = 0;
+    let sendTimer = 0;
+    let envelopes = [];
+    let minLink = 100;
+    let offset = { x: 0, y: 0 };   // position jump while jamming and unprotected
+    let anchor = { x: 0, y: 0 };   // last good position: the link still points here
+    let wasSpoofed = false;
+    let satIdx = 0;                // satellite in use
+    let satLostX = 200;            // satellite that was left at the last change
+    let satFlash = 0;              // seconds left to show the satellite change
+    let changeIdx = 0;             // next planned change
+    let switching = false;         // inside a change window
+    let switchFailed = false;      // the last change lost the connection
+    let switchProtected = false;   // Protect was pressed during the current change
+    let switchJam = false;         // jamming was on at some moment of the current change
+    let changesOk = 0;
+    let changesLost = 0;
+    let events = [];               // spoofing events of this round: { start, dur }
+    let nextTimer = null;          // timer that starts the next level by itself
 
-    // Controls
+    // Where the vessel is drawn: the true position plus the jump
+    function shipDisplay() {
+      return { x: ship.x + offset.x, y: ship.y + offset.y };
+    }
+
+    function othersJumped() {
+      return OTHERS.filter(o => jamming && T - jamStart >= (o.delay / 4) * jamDur * 0.8);
+    }
+
+    // Seconds until the next planned change while the next satellite is shown (else Infinity)
+    function secondsToChange() {
+      if (!gameRunning || switching || changeIdx >= CHANGE_TIMES.length) return Infinity;
+      const eta = CHANGE_TIMES[changeIdx] - T;
+      return eta > 0 && eta <= WARN_SEC ? eta : Infinity;
+    }
+
+    // Attack length picked at random from the real episodes
+    function pickDur() {
+      const ep = REAL_DATA.pool[Math.floor(Math.random() * REAL_DATA.pool.length)];
+      return Math.max(ATTACK_MIN_DUR, Math.min(ATTACK_MAX_DUR, 0.5 + 0.5 * Math.sqrt(ep[0])));
+    }
+
+    // Lay k random attacks inside [a, b]; padA and padB keep distance from the neighbouring attacks
+    function layoutAttacks(k, a, b, padA, padB) {
+      const usable = b - a - padA - padB;
+      if (k <= 0 || usable <= 0.2) return [];
+      const durs = [];
+      for (let i = 0; i < k; i++) durs.push(pickDur());
+      let total = durs.reduce((x, y) => x + y, 0);
+      if (total > ATTACK_MAX_SHARE * usable) {
+        const s = ATTACK_MAX_SHARE * usable / total;
+        for (let i = 0; i < k; i++) durs[i] *= s;
+        total *= s;
+      }
+      const free = usable - total;
+      const minGap = k > 1 ? Math.min(GAP_MIN, 0.9 * free / (k - 1)) : 0;
+      const extra = Math.max(0, free - minGap * (k - 1));
+      const w = [];
+      let wsum = 0;
+      for (let i = 0; i <= k; i++) {
+        const r = Math.random() + 0.05;
+        w.push(r);
+        wsum += r;
+      }
+      let t = a + padA + extra * w[0] / wsum;
+      const out = [];
+      for (let i = 0; i < k; i++) {
+        out.push({ start: t, dur: durs[i] });
+        t += durs[i] + (i < k - 1 ? minGap + extra * w[i + 1] / wsum : 0);
+      }
+      return out;
+    }
+
+    // Attacks for one round. Every satellite change has its own attack: it starts a random 2 to 6
+    // seconds before the change and lasts until the change is done plus CHANGE_ATTACK_AFTER seconds.
+    // The other n - 5 attacks are random, placed in the free time around those attacks with at
+    // least GAP_MIN seconds between them when there is room.
+    function makeEvents(n) {
+      const raw = CHANGE_TIMES.map(t0 => ({
+        start: t0 - (CHANGE_ATTACK_LEAD + Math.random() * CHANGE_ATTACK_LEAD_VAR),
+        end: t0 + CHANGE_WINDOW + CHANGE_ATTACK_AFTER
+      }));
+      const tied = [];
+      raw.forEach(r => {
+        const last = tied[tied.length - 1];
+        if (last && r.start <= last.start + last.dur) {
+          last.dur = Math.max(last.dur, r.end - last.start);   // overlapping: one longer attack
+        } else {
+          tied.push({ start: r.start, dur: r.end - r.start });
+        }
+      });
+      const gaps = [];
+      let cursor = ATTACK_FIRST;
+      tied.forEach(e => {
+        gaps.push([cursor, e.start]);
+        cursor = e.start + e.dur;
+      });
+      gaps.push([cursor, ATTACK_LAST]);
+      // share the other attacks over the free time, in proportion to its length
+      const m = Math.max(0, n - CHANGE_TIMES.length);
+      const lens = gaps.map(g => Math.max(0, g[1] - g[0]));
+      const totalLen = lens.reduce((x, y) => x + y, 0);
+      const counts = lens.map(l => Math.floor(m * l / totalLen));
+      let left = m - counts.reduce((x, y) => x + y, 0);
+      const order = lens.map((l, i) => i).sort((i, j) =>
+        (m * lens[j] / totalLen - counts[j]) - (m * lens[i] / totalLen - counts[i]));
+      for (let i = 0; left > 0; i = (i + 1) % order.length, left--) counts[order[i]]++;
+      const out = tied.slice();
+      gaps.forEach((g, i) => {
+        const pad = Math.min(GAP_MIN, 0.3 * lens[i]);
+        layoutAttacks(counts[i], g[0], g[1], i === 0 ? 0 : pad, i === gaps.length - 1 ? 0 : pad)
+          .forEach(e => out.push(e));
+      });
+      out.sort((x, y) => x.start - y.start);
+      // each attack puts the false position at a random place on the coast, not the same twice in a row
+      let prevSpot = -1;
+      out.forEach(e => {
+        let k;
+        do {
+          k = Math.floor(Math.random() * FALSE_SPOTS.length);
+        } while (k === prevSpot && FALSE_SPOTS.length > 1);
+        e.spot = k;
+        prevSpot = k;
+      });
+      return out;
+    }
+
+    // Controls: each click or touch anywhere on the map (or Space) protects for PROTECT_SEC
+    // seconds, press again to renew. Holding the mouse button or the key down does not extend it.
+    let tapMarks = [];             // rings that show where the player tapped: { x, y, age }
+    function tapProtect(x, y) {
+      if (!gameRunning) return;
+      protectUntil = T + PROTECT_SEC;
+      lastTapT = T;
+      holding = true;
+      if (x !== undefined) tapMarks.push({ x: x, y: y, age: 0 });
+    }
+    function holdOff() {
+      protectUntil = 0;
+      holding = false;
+    }
     window.addEventListener("keydown", e => {
-      keys[e.key] = true;
-    });
-    window.addEventListener("keyup", e => {
-      keys[e.key] = false;
-    });
-
-    // Touch controls
-    canvas.addEventListener("touchstart", e => {
-      e.preventDefault();
-      const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-      if (touchX < canvas.width / 2) {
-        keys["ArrowLeft"] = true;
-        keys["ArrowRight"] = false;
-      } else {
-        keys["ArrowRight"] = true;
-        keys["ArrowLeft"] = false;
+      if (e.key === " ") {
+        e.preventDefault();
+        if (!e.repeat) tapProtect();
       }
     });
-    canvas.addEventListener("touchend", () => {
-      keys["ArrowLeft"] = false;
-      keys["ArrowRight"] = false;
+    canvas.addEventListener("pointerdown", e => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      tapProtect((e.clientX - rect.left) * canvas.width / rect.width,
+                 (e.clientY - rect.top) * canvas.height / rect.height);
     });
+    canvas.addEventListener("contextmenu", e => e.preventDefault());
 
     function startGame() {
-      ship.x = 175;
-      obstacles = [];
-      score = 0;
-      speed = 3;
-      spawnTimer = 0;
+      if (!REAL_DATA || !REAL_DATA.levels.length) {
+        messageDisplay.textContent = "No replay data available.";
+        return;
+      }
+      if (nextTimer) {
+        clearTimeout(nextTimer);
+        nextTimer = null;
+      }
+      T = 0;
+      protectUntil = 0;
+      lastTapT = -99;
+      holding = false;
+      tapMarks = [];
+      ship = routeAt(0);
+      link = 100;
+      minLink = 100;
+      jamming = false;
+      jamStart = 0;
+      jamDur = 2;
+      jamEventStart = -1;
+      written = 0;
+      sent = 0;
+      writeTimer = 0;
+      sendTimer = 0;
+      envelopes = [];
+      offset = { x: 0, y: 0 };
+      anchor = { x: ship.x, y: ship.y };
+      wasSpoofed = false;
+      satIdx = 0;
+      satLostX = SATS[0];
+      satFlash = 0;
+      changeIdx = 0;
+      switching = false;
+      switchFailed = false;
+      switchProtected = false;
+      switchJam = false;
+      changesOk = 0;
+      changesLost = 0;
+      events = makeEvents(REAL_DATA.levels[+levelSel.value].attacks);
       gameRunning = true;
       messageDisplay.textContent = "";
       startBtn.style.display = "none";
+      levelSel.disabled = true;
       scoreDisplay.textContent = "0";
-      gameLoop();
+      lastNow = performance.now();
+      gameLoop(lastNow);
     }
 
-    function spawnObstacle() {
-      const width = 40 + Math.random() * 30;
-      const x = Math.random() * (canvas.width - width);
-      obstacles.push({
-        x: x,
-        y: -60,
-        width: width,
-        height: 40 + Math.random() * 20
+    function update(dt) {
+      if (!gameRunning) return;
+      T += dt;
+      ship = routeAt(T / ROUND_SEC);
+
+      // A press protects for PROTECT_SEC seconds
+      holding = T < protectUntil;
+      tapMarks.forEach(m => { m.age += dt; });
+      tapMarks = tapMarks.filter(m => m.age < 0.5);
+
+      // Spoofing events
+      const cur = events.find(e => T >= e.start && T < e.start + e.dur);
+      const nowJam = !!cur;
+      if (nowJam && (!jamming || cur.start !== jamEventStart)) {
+        jamStart = T;
+        jamDur = cur.dur;
+        jamEventStart = cur.start;
+        falsePos = FALSE_SPOTS[cur.spot];
+      }
+      jamming = nowJam;
+
+      // The position is spoofed while jamming is on and the terminal is not protected
+      const spoofed = jamming && !holding;
+
+      // Planned satellite changes: if the position is spoofed during the change, the link is lost
+      if (changeIdx < CHANGE_TIMES.length) {
+        const t0 = CHANGE_TIMES[changeIdx];
+        if (!switching && T >= t0) {
+          switching = true;
+          switchFailed = false;
+          switchProtected = false;
+          switchJam = false;
+          satLostX = SATS[satIdx];
+          satIdx = (satIdx + 1) % SATS.length;
+          satFlash = 2.5;
+          // Position not spoofed at the start of the change: the connection is ok on the new
+          // satellite, even if the link was down after an earlier change
+          if (!spoofed) link = 100;
+          // A press in the last PRE_GRACE seconds before the change counts as protected
+          if (T - lastTapT <= PRE_GRACE) {
+            switchProtected = true;
+            link = 100;
+          }
+        }
+        if (switching) {
+          if (jamming) switchJam = true;
+          // Protect pressed any time during the change: the connection is ok, even if the
+          // position was spoofed before or the link was down after an earlier change
+          if (holding && !switchProtected) {
+            switchProtected = true;
+            link = 100;
+          }
+          if (T >= t0 + CHANGE_WINDOW) {
+            if (switchJam && !switchProtected) {
+              switchFailed = true;
+              link = 0;               // jamming and no Protect during the change: connection lost
+              changesLost++;
+              satFlash = 2.5;         // show the lost connection after the longer window
+            } else {
+              changesOk++;
+            }
+            switching = false;
+            changeIdx++;
+          }
+        }
+      }
+
+      // A spoofed position jumps to the false position; the link stays on the old position
+      if (spoofed) {
+        if (!wasSpoofed) {
+          anchor = { x: ship.x, y: ship.y };
+          wasSpoofed = true;
+        }
+        offset = {
+          x: falsePos[0] + 2 * Math.sin(T * 3) - ship.x,
+          y: falsePos[1] + 2 * Math.cos(T * 2.3) - ship.y
+        };
+      } else {
+        wasSpoofed = false;
+        const keep = Math.max(0, 1 - dt * 12);
+        offset = { x: offset.x * keep, y: offset.y * keep };
+        anchor = { x: ship.x, y: ship.y };
+      }
+
+      // The link comes back once the position is not spoofed and no change is going on unprotected
+      if (!spoofed && !(switching && switchFailed)) {
+        link = Math.min(100, link + RECOVER * dt);
+      }
+      minLink = Math.min(minLink, link);
+
+      // The crew writes emails; they are sent only while the link is up
+      // the first email is written at the start, so the last one is ready before the trip ends
+      written = Math.min(EMAILS_TOTAL, Math.floor(T * EMAILS_TOTAL / ROUND_SEC + 1e-6) + 1);
+      if (link >= SEND_MIN_LINK && sent < written) {
+        sendTimer += dt;
+        while (sendTimer >= SEND_EVERY && sent < written) {
+          sendTimer -= SEND_EVERY;
+          sent++;
+          envelopes.push({ x: anchor.x, y: anchor.y, p: 0 });
+        }
+        scoreDisplay.textContent = sent;
+      } else {
+        sendTimer = 0;
+      }
+      envelopes.forEach(en => { en.p += dt / 1.2; });
+      envelopes = envelopes.filter(en => en.p < 1);
+      satFlash = Math.max(0, satFlash - dt);
+
+      if (T >= ROUND_SEC) finish();
+    }
+
+    function label(text, x, y, color) {
+      ctx.font = "bold 12px Arial";
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "rgba(0,0,0,0.75)";
+      ctx.strokeText(text, x, y);
+      ctx.fillStyle = color;
+      ctx.fillText(text, x, y);
+    }
+
+    function drawMap() {
+      if (mapReady) {
+        ctx.drawImage(mapImg, CROP.x, CROP.y, CROP.w, CROP.h, 0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = "#0b2a4a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      // Route
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,0.6)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ROUTE.forEach((p, i) => { if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); });
+      ctx.stroke();
+      ctx.restore();
+      // Start and destination
+      const s = ROUTE[0];
+      ctx.fillStyle = "#fde047";
+      ctx.beginPath(); ctx.arc(s[0], s[1], 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#86efac";
+      ctx.beginPath(); ctx.arc(DUBAI[0], DUBAI[1], 5, 0, Math.PI * 2); ctx.fill();
+      ctx.textAlign = "left";
+      label("Hormuz", s[0] + 8, s[1] + 4, "#fde047");
+      label("Dubai", DUBAI[0] + 8, DUBAI[1] + 4, "#86efac");
+      // Picture credit
+      ctx.font = "9px Arial";
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.textAlign = "right";
+      ctx.fillText("Image: NASA MODIS Terra, 2 Dec 2020", canvas.width - 6, canvas.height - 6);
+      ctx.textAlign = "left";
+    }
+
+    function drawOthers() {
+      const jumped = gameRunning ? othersJumped() : [];
+      // The common false position
+      if (jumped.length) {
+        const pulse = 10 + 3 * Math.sin(Date.now() / 150);
+        ctx.strokeStyle = "rgba(248,113,113,0.95)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(falsePos[0], falsePos[1], pulse + 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.textAlign = "left";
+        label("false position", falsePos[0] + 22, falsePos[1] - 14, "#fca5a5");
+      }
+      OTHERS.forEach(o => {
+        const isJumped = gameRunning && jamming && T - jamStart >= (o.delay / 4) * jamDur * 0.8;
+        const home = onMap(o.home[0], o.home[1]);
+        if (isJumped) {
+          // line from the start position (or map edge) to the false position
+          ctx.save();
+          ctx.strokeStyle = "rgba(248,113,113,0.55)";
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 4]);
+          ctx.beginPath();
+          ctx.moveTo(home[0], home[1]);
+          ctx.lineTo(falsePos[0], falsePos[1]);
+          ctx.stroke();
+          ctx.restore();
+          const jx = falsePos[0] + ((o.delay * 37) % 9) - 4;
+          const jy = falsePos[1] + ((o.delay * 53) % 9) - 4;
+          ctx.fillStyle = "#f87171";
+          ctx.beginPath(); ctx.arc(jx, jy, 3, 0, Math.PI * 2); ctx.fill();
+        } else {
+          ctx.fillStyle = home[2] ? "#f8fafc" : "rgba(248,250,252,0.55)";
+          ctx.beginPath(); ctx.arc(home[0], home[1], home[2] ? 3 : 2.5, 0, Math.PI * 2); ctx.fill();
+        }
       });
     }
 
-    function update() {
-      if (!gameRunning) return;
+    function drawSat(x, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(x, SAT_Y + 4);
+      ctx.scale(0.7, 0.7);          // small enough that neighbouring satellites do not overlap
+      ctx.fillStyle = "#e2e8f0";
+      ctx.fillRect(-6, -4, 12, 8);
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(-24, -2, 15, 4);
+      ctx.fillRect(9, -2, 15, 4);
+      ctx.restore();
+    }
 
-      // Move ship
-      if ((keys["ArrowLeft"] || keys["a"] || keys["A"]) && ship.x > 0) {
-        ship.x -= 6;
+    function drawSatelliteLink() {
+      const SAT = { x: SATS[satIdx], y: SAT_Y };
+      const online = link >= SEND_MIN_LINK;
+      ctx.save();
+      ctx.strokeStyle = online ? "rgba(134,239,172,0.85)" : "rgba(248,113,113,0.9)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 8]);
+      if (online) ctx.lineDashOffset = -Date.now() / 40;
+      ctx.beginPath();
+      ctx.moveTo(anchor.x, anchor.y);
+      ctx.lineTo(SAT.x, SAT.y + 10);
+      ctx.stroke();
+      ctx.restore();
+      // Old position the link still points to
+      if (wasSpoofed) {
+        ctx.strokeStyle = "#fca5a5";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(anchor.x, anchor.y, 9, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.textAlign = "left";
+        label("link still here", anchor.x + 12, anchor.y + 4, "#fca5a5");
       }
-      if ((keys["ArrowRight"] || keys["d"] || keys["D"]) && ship.x < canvas.width - ship.width) {
-        ship.x += 6;
+      // Change just made: the satellite that was left is dimmed, the new one is marked
+      if (satFlash > 0) {
+        drawSat(satLostX, 0.35);
+        ctx.textAlign = "center";
+        label(switchFailed ? "connection lost" : "changed", satLostX, SAT_Y + 30,
+          switchFailed ? "#fca5a5" : "#86efac");
+        label("new satellite", SAT.x, SAT_Y + 44, "#86efac");
+        ctx.textAlign = "left";
       }
-
-      // Spawn obstacles
-      spawnTimer++;
-      if (spawnTimer > 50 - Math.min(score / 10, 25)) {
-        spawnObstacle();
-        spawnTimer = 0;
+      // Next satellite: shown a few seconds before the planned change, with arrow and countdown
+      const eta = secondsToChange();
+      if (eta < Infinity) {
+        const nx = SATS[(satIdx + 1) % SATS.length];
+        const ramp = Math.min(1, 0.45 + 0.55 * (1 - eta / WARN_SEC));
+        drawSat(nx, ramp);
+        ctx.save();
+        ctx.strokeStyle = "rgba(253,224,71," + (0.5 + 0.4 * Math.sin(Date.now() / 120)) + ")";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.arc(nx, SAT_Y + 4, 22, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // arrow above the satellites, from the one in use to the next one (to the left)
+        const dir = nx > SAT.x ? 1 : -1;
+        const ay = SAT_Y - 14;
+        ctx.strokeStyle = "#fde047";
+        ctx.beginPath();
+        ctx.moveTo(SAT.x, ay);
+        ctx.lineTo(nx, ay);
+        ctx.lineTo(nx - dir * 7, ay - 5);
+        ctx.moveTo(nx, ay);
+        ctx.lineTo(nx - dir * 7, ay + 5);
+        ctx.stroke();
+        ctx.restore();
+        ctx.textAlign = "center";
+        label("next satellite", nx, SAT_Y + 44, "#fde047");
+        label("change in " + eta.toFixed(1) + " s", nx, SAT_Y + 58, "#fde047");
+        ctx.textAlign = "left";
       }
+      // Satellite in use
+      drawSat(SAT.x, 1);
+      // Envelopes flying to the satellite
+      envelopes.forEach(en => {
+        const x = en.x + (SAT.x - en.x) * en.p;
+        const y = en.y + (SAT.y + 10 - en.y) * en.p;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(x - 8, y - 5, 16, 10);
+        ctx.strokeStyle = "#0369a1";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x - 8, y - 5);
+        ctx.lineTo(x, y + 1);
+        ctx.lineTo(x + 8, y - 5);
+        ctx.stroke();
+      });
+    }
 
-      // Move obstacles
-      for (let i = obstacles.length - 1; i >= 0; i--) {
-        obstacles[i].y += speed;
+    function drawShip() {
+      const d = shipDisplay();
+      const jumped = Math.hypot(offset.x, offset.y) > 5;
+      ctx.save();
+      ctx.translate(d.x, d.y);
+      ctx.rotate(ship.heading);
+      ctx.fillStyle = jumped ? "#fca5a5" : "#f8fafc";
+      ctx.strokeStyle = "rgba(0,0,0,0.6)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(10, 0);
+      ctx.lineTo(4, 5);
+      ctx.lineTo(-9, 5);
+      ctx.lineTo(-9, -5);
+      ctx.lineTo(4, -5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#334155";
+      ctx.fillRect(-4, -3, 6, 6);
+      ctx.restore();
+    }
 
-        // Collision detection
-        if (
-          ship.x < obstacles[i].x + obstacles[i].width &&
-          ship.x + ship.width > obstacles[i].x &&
-          ship.y < obstacles[i].y + obstacles[i].height &&
-          ship.y + ship.height > obstacles[i].y
-        ) {
-          crash();
-          return;
+    function banner(text, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(30, 54, 340, 26);
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.font = "bold 13px Arial";
+      ctx.fillText(text, 200, 71);
+      ctx.textAlign = "left";
+    }
+
+    function drawHud() {
+      // Crew link bar
+      ctx.fillStyle = "rgba(6,26,51,0.7)";
+      ctx.fillRect(0, 0, canvas.width, 48);
+      ctx.textAlign = "left";
+      ctx.font = "12px Arial";
+      ctx.fillStyle = "#e2e8f0";
+      ctx.fillText("CREW LINK", 10, 18);
+      ctx.fillStyle = "rgba(255,255,255,0.2)";
+      ctx.fillRect(80, 8, 170, 12);
+      ctx.fillStyle = link > 60 ? "#22c55e" : (link > 30 ? "#f59e0b" : "#ef4444");
+      ctx.fillRect(80, 8, 170 * Math.max(0, link) / 100, 12);
+      ctx.fillStyle = "#fde047";
+      ctx.font = "bold 12px Arial";
+      ctx.fillText("LEVEL " + (+levelSel.value + 1), 260, 18);
+      ctx.font = "12px Arial";
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#e2e8f0";
+      ctx.fillText(Math.max(0, Math.ceil(ROUND_SEC - T)) + " s", 390, 18);
+      // Counters
+      ctx.textAlign = "left";
+      ctx.font = "bold 12px Arial";
+      ctx.fillStyle = "#e2e8f0";
+      ctx.fillText("Sent " + sent + " | Waiting " + (written - sent) + " | Changes ok " + changesOk + "/" + CHANGE_TIMES.length, 10, 40);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#fca5a5";
+      const n = gameRunning ? othersJumped().length : 0;
+      ctx.fillText("Others spoofed " + n + "/" + OTHERS.length, 390, 40);
+      // Protect timer: how long the last press keeps you protected
+      if (gameRunning) {
+        const left = Math.max(0, protectUntil - T) / PROTECT_SEC;
+        ctx.fillStyle = "rgba(6,26,51,0.75)";
+        ctx.fillRect(8, 558, 150, 32);
+        ctx.font = "bold 10px Arial";
+        ctx.textAlign = "left";
+        ctx.fillStyle = left > 0 ? "#86efac" : "#cbd5e1";
+        ctx.fillText(left > 0 ? "PROTECTED" : "NOT PROTECTED - TAP", 14, 571);
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        ctx.fillRect(14, 576, 138, 8);
+        ctx.fillStyle = "#22c55e";
+        ctx.fillRect(14, 576, 138 * left, 8);
+      }
+      // Banner
+      if (gameRunning) {
+        const eta = secondsToChange();
+        if (switching) {
+          if (switchProtected) banner("SATELLITE CHANGE - PROTECTED", "rgba(22,163,74,0.92)");
+          else if (switchJam) banner("TAP PROTECT NOW OR THE CONNECTION IS LOST", "rgba(185,28,28,0.92)");
+          else banner("SATELLITE CHANGE - POSITION OK", "rgba(22,163,74,0.92)");
+        } else if (switchFailed && satFlash > 0) {
+          banner("CONNECTION LOST - NOT PROTECTED DURING CHANGE", "rgba(185,28,28,0.92)");
+        } else if (eta < Infinity) {
+          if (eta <= PRE_GRACE) banner("SATELLITE CHANGE IN " + eta.toFixed(1) + " s - TAP PROTECT NOW", "rgba(161,98,7,0.92)");
+          else banner("SATELLITE CHANGE IN " + eta.toFixed(1) + " s - GET READY", "rgba(14,116,144,0.92)");
+        } else if (jamming) {
+          if (holding) banner("SPOOFING EVENT - PROTECTED, POSITION OK", "rgba(22,163,74,0.92)");
+          else banner("SPOOFING EVENT - POSITION SPOOFED", "rgba(185,28,28,0.92)");
         }
-
-        // Remove off-screen obstacles + add score
-        if (obstacles[i].y > canvas.height) {
-          obstacles.splice(i, 1);
-          score += 10;
-          scoreDisplay.textContent = score;
-          // Increase difficulty
-          if (score % 50 === 0) speed += 0.3;
-        }
       }
+      ctx.textAlign = "left";
     }
 
     function draw() {
-      // Clear
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawMap();
+      drawOthers();
+      drawSatelliteLink();
+      drawShip();
+      drawTapMarks();
+      drawHud();
+    }
 
-      // Water waves (simple)
-      ctx.fillStyle = "rgba(255,255,255,0.05)";
-      for (let i = 0; i < 8; i++) {
-        ctx.fillRect(0, (Date.now() / 30 + i * 80) % 700, canvas.width, 15);
-      }
-
-      // Draw ship
-      ctx.fillStyle = "#f8fafc";
-      // Hull
-      ctx.beginPath();
-      ctx.moveTo(ship.x + 5, ship.y + 60);
-      ctx.lineTo(ship.x + ship.width - 5, ship.y + 60);
-      ctx.lineTo(ship.x + ship.width - 15, ship.y + 20);
-      ctx.lineTo(ship.x + 15, ship.y + 20);
-      ctx.closePath();
-      ctx.fill();
-
-      // Cabin
-      ctx.fillStyle = "#e2e8f0";
-      ctx.fillRect(ship.x + 15, ship.y + 25, 20, 20);
-
-      // Mast
-      ctx.fillStyle = "#334155";
-      ctx.fillRect(ship.x + 23, ship.y, 4, 30);
-
-      // Sail
-      ctx.fillStyle = "#fef3c7";
-      ctx.beginPath();
-      ctx.moveTo(ship.x + 27, ship.y + 5);
-      ctx.lineTo(ship.x + 55, ship.y + 20);
-      ctx.lineTo(ship.x + 27, ship.y + 35);
-      ctx.closePath();
-      ctx.fill();
-
-      // Draw obstacles (rocks)
-      obstacles.forEach(obs => {
-        ctx.fillStyle = "#57534e";
+    // A ring that spreads where the player tapped
+    function drawTapMarks() {
+      tapMarks.forEach(m => {
+        const k = m.age / 0.5;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - k);
+        ctx.strokeStyle = "#86efac";
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(obs.x + obs.width / 2, obs.y);
-        ctx.lineTo(obs.x + obs.width, obs.y + obs.height * 0.7);
-        ctx.lineTo(obs.x + obs.width * 0.8, obs.y + obs.height);
-        ctx.lineTo(obs.x + obs.width * 0.2, obs.y + obs.height);
-        ctx.lineTo(obs.x, obs.y + obs.height * 0.7);
-        ctx.closePath();
-        ctx.fill();
-
-        // Rock highlight
-        ctx.fillStyle = "#78716c";
-        ctx.beginPath();
-        ctx.arc(obs.x + obs.width * 0.3, obs.y + obs.height * 0.4, 6, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.arc(m.x, m.y, 8 + 40 * k, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
       });
     }
 
-    function crash() {
+    function finish() {
       gameRunning = false;
-      messageDisplay.textContent = "CRASH! Your ship sank!";
-      startBtn.style.display = "inline-block";
-      startBtn.textContent = "Sail Again";
       cancelAnimationFrame(animationId);
+      holdOff();
+      const idx = +levelSel.value;
+      const lastLevel = REAL_DATA.levels.length - 1;
+      const passed = sent > ADVANCE_EMAILS;
+      const stats = sent + " of " + written + " emails sent.\n" +
+        "Satellite changes passed " + changesOk + " of " + CHANGE_TIMES.length +
+        ", connection lost " + changesLost + " times.";
+      messageDisplay.style.whiteSpace = "pre-line";
+      levelSel.disabled = false;
+      startBtn.style.display = "inline-block";
+      if (passed && idx < lastLevel) {
+        // more than ADVANCE_EMAILS sent: the next level starts by itself
+        messageDisplay.style.color = "#86efac";
+        messageDisplay.textContent = "LEVEL " + (idx + 1) + " DONE! " + stats + "\nLevel " + (idx + 2) + " starts in " +
+          Math.round(NEXT_LEVEL_DELAY / 1000) + " s";
+        levelSel.value = idx + 1;
+        startBtn.textContent = "Start Level " + (idx + 2) + " now";
+        nextTimer = setTimeout(() => { nextTimer = null; startGame(); }, NEXT_LEVEL_DELAY);
+      } else if (passed) {
+        messageDisplay.style.color = "#86efac";
+        messageDisplay.textContent = "ALL " + (lastLevel + 1) + " LEVELS DONE! " + stats;
+        levelSel.value = 0;
+        startBtn.textContent = "Play again from Level 1";
+      } else {
+        messageDisplay.style.color = "#fca5a5";
+        messageDisplay.textContent = "LEVEL " + (idx + 1) + " NOT PASSED. " + stats + "\nYou need more than " +
+          ADVANCE_EMAILS + " emails to go on.";
+        startBtn.textContent = "Sail Again";
+      }
     }
 
-    function gameLoop() {
-      update();
+    function gameLoop(now) {
+      const dt = Math.min(0.05, Math.max(0, (now - lastNow) / 1000));
+      lastNow = now;
+      update(dt);
       draw();
       if (gameRunning) {
         animationId = requestAnimationFrame(gameLoop);
